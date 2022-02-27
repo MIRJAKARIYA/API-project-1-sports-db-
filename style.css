@@ -1,3 +1,6 @@
+.main-heading{
+    color: blue;
+}
 .input-style{
     width: 40%;
     margin: 0px auto;
@@ -7,16 +10,8 @@
     border: none;
     padding: 20px;
     height: 40px;
-    border-radius: 50px;
+    border-radius: 10px;
     font-size: 20px;
-    box-shadow: 2px 4px 8px rgba(0, 0, 0, 0.308) inset;
-    color: red;
-    font-weight: 600;
-}
-#button-addon2{
-    margin-left: 10px;
-    border-radius: 50px;
-    width: 40%;
 }
 .row-style{
     width: 100%;
@@ -28,6 +23,7 @@
 }
 body{
     background-color: #d29d2b48;
+    font-family:Arial, Helvetica, sans-serif;
 }
 .modal-body{
     background-color: rgba(128, 128, 128, 0.205);
@@ -50,4 +46,12 @@ body{
 }
 .des-heading{
     color: purple;
+}
+#spinner{
+    display: none;
+}
+.error-mgs{
+    width: max-content;
+    margin:-10px auto 0px;
+    display: none;
 }

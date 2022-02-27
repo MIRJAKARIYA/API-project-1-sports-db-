@@ -1,19 +1,35 @@
+//getting the input text and error handling for empty string
 const searchInput = () => {
     const inputText = document.getElementById('input-text');
-    const inputTextValue = inputText.value;
-    getPlayer(inputTextValue);
     document.getElementById('main-container').textContent = '';
+    const inputTextValue = inputText.value;
+    if(inputTextValue == '' ){
+      document.getElementById('error-mgs').style.display='block';
+      return;
+    }
+    document.getElementById('error-mgs').style.display='none';
+    inputText.value='';
+    getPlayer(inputTextValue);
 };
-
+//calling player db API
 const getPlayer = inputTextValue => {
+    document.getElementById('spinner').style.display = 'block';
     const url = `https://www.thesportsdb.com/api/v1/json/2/searchplayers.php?p=${inputTextValue}`;
     console.log(url)
     fetch(url)
     .then(res => res.json())
     .then(data => showResult(data.player))
 };
+//showing result in the main container
 const showResult = players => {
     const container = document.getElementById('main-container');
+    if(players == null){
+      setTimeout(() => {
+        document.getElementById('spinner').style.display = 'none';
+        container.innerHTML = '<h1 class="text-danger" style="width: max-content;margin:100px auto">😕Sorry no match found.</h1>'
+      },3000);
+      return;
+    }
     players.forEach(player => {
       if(player.strThumb == null){
         fetch(`https://restcountries.com/v3.1/name/${player.strNationality}`)
@@ -21,26 +37,16 @@ const showResult = players => {
         .then(data => nation(data[0].coatOfArms.png,player))
     }
       else{
-          const div = document.createElement('div');
-          div.classList.add('col-lg-3','col-md-4','mb-3');
-          div.innerHTML = `
-          <div class="card p-4 style-content h-100">
-            <img src="${player.strThumb}" class="card-img-top d-block">
-            <div class="card-body">
-              <h5 class="card-title">${player.strPlayer}</h5>
-              <p>${player.strNationality}</p>
-            </div>
-            <div>
-              <button type="button" onclick="showDetails('${player.idPlayer}')" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#exampleModal">Details</button>
-              <button class="btn btn-danger">Delete</button>
-            </div>
-          </div>
-          `;
-          container.appendChild(div);
+          putData(player.strThumb,player);
       }
     });
+    document.getElementById('spinner').style.display = 'none';
 };
 const nation = (nationality,player) => {
+  putData(nationality,player);
+};
+//common function for result showing
+const putData = (nationality,player) => {
   const container = document.getElementById('main-container');
   const div = document.createElement('div');
           div.classList.add('col-lg-3','col-md-4','mb-3');
@@ -58,7 +64,7 @@ const nation = (nationality,player) => {
           </div>
           `;
           container.appendChild(div);
-};
+}
 //show details on modal
 const showDetails = playerId => {
     const url = `https://www.thesportsdb.com/api/v1/json/2/lookupplayer.php?id=${playerId}`;
@@ -66,14 +72,17 @@ const showDetails = playerId => {
     .then(res => res.json())
     .then(data => putDetailsInModal(data.players[0]));
 }
+const imgUrl = "sportsman.png"; //default image for modal if no image of the player is found
+//putting data into modal
 const putDetailsInModal = details => {
     const modalContaienr = document.getElementById('put-modal');
     modalContaienr.textContent = '';
+    document.getElementById('description').textContent = '';
     const div = document.createElement('div');
     div.innerHTML = `
           <div class="d-flex modal-top-style mb-3 p-3">
             <div class="w-50">
-              <img src="${details.strThumb}" alt="Picture not available" class="w-100">
+              <img src="${details.strThumb || details.strCutout || details.strCutout || imgUrl}" alt="Picture is not available." class="w-100">
             </div>
             <div class="w-50 ps-2 info-style">
               <p class="m-1"><span class="label-style">Name:</span> ${details.strPlayer}</p>
@@ -88,7 +97,7 @@ const putDetailsInModal = details => {
           </div>
           <div class="modal-bottom-style p-3">
             <h3 class="text-decoration-underline des-heading">Player's description:</h3>
-            <p>${details.strDescriptionEN||details.strDescriptionDE||details.strDescriptionFR||details.strDescriptionCN||'No description found'}</p>
+            <p>${details.strDescriptionEN||details.strDescriptionDE||details.strDescriptionFR||details.strDescriptionCN||details.strTeam||'No description found.'}</p>
           </div>
           `;
     modalContaienr.appendChild(div);
@@ -99,4 +108,9 @@ document.getElementById('main-container').addEventListener('click', event => {
     console.log(event.target.parentNode.parentNode.parentNode)
     event.target.parentNode.parentNode.parentNode.style.display = 'none';
   }
-})
+});
+//clearing modal before adding new data
+const clearModal = () => {
+    document.getElementById('put-modal').textContent = '';
+    document.getElementById('description').textContent = '';
+};
